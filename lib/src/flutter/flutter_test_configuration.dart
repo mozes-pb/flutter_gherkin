@@ -34,6 +34,14 @@ class FlutterTestConfiguration extends TestConfiguration {
   /// Defaults to empty
   String targetDeviceId = "";
 
+  /// Bypass permissions
+  /// Defaults to empty
+  List<String> permissions = [""];
+
+  /// Identify which bundle ID for Set Permissions
+  /// This is mandatory if we want to bypass permissions in iOS
+  String bundleId = "";
+
   void setObservatoryDebuggerUri(String uri) => _observatoryDebuggerUri = uri;
 
   Future<FlutterDriver> createFlutterDriver([String dartVmServiceUrl]) async {

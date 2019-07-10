@@ -28,6 +28,12 @@ class FlutterRunProcessHandler extends ProcessHandler {
   bool _buildApp = true;
   String _buildFlavor;
   String _deviceTargetId;
+  List<String> _permissions;
+  String _bundleId;
+
+  void setBypassPermissions(List<String> value) {
+    _permissions = value;
+  }
 
   void setApplicationTargetFile(String targetPath) {
     _appTarget = targetPath;
@@ -45,8 +51,24 @@ class FlutterRunProcessHandler extends ProcessHandler {
     _deviceTargetId = deviceTargetId;
   }
 
+  void setBundleId(String bundleId) {
+    _bundleId = bundleId;
+  }
+
   void setBuildRequired(bool build) {
     _buildApp = build;
+  }
+
+  Future<void> bypassPermissions() async {
+    if(_deviceTargetId.isEmpty || _bundleId.isEmpty){
+      throw Exception(
+          "FlutterRunProcessHandler: to bypass permissions, bundleId and targetDeviceId must be present");
+    }
+    final arguments = ["--byId", _deviceTargetId, "--bundle", _bundleId, "--setPermissions"];
+    for (int i = 0; i < _permissions.length; i++) {
+      arguments.add("${_permissions[i]}=YES");
+    }
+    await Process.run('applesimutils', arguments);
   }
 
   @override
@@ -62,15 +84,12 @@ class FlutterRunProcessHandler extends ProcessHandler {
     }
 
     if (_deviceTargetId.isNotEmpty) {
-      print('device id===========> ' + _deviceTargetId);
       arguments.add("--device-id=$_deviceTargetId");
     }
-    
 
-//    final iosBundleIdentifier = 'id.co.homecredit.smart';
-//    final iosSimulatorID = '1333BE8E-FC20-41BC-87EA-DF14C9AD4178';
-//
-//    await Process.run('applesimutils', ["--byId", iosSimulatorID, "--bundle", iosBundleIdentifier, "--setPermissions", "notifications=YES"]);
+    if(_permissions.isNotEmpty){
+      await bypassPermissions();
+    }
 
     _runningProcess = await Process.start("flutter", arguments,
         workingDirectory: _workingDirectory, runInShell: true);

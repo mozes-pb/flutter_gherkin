@@ -48,8 +48,11 @@ class FlutterAppRunnerHook extends Hook {
         .setBuildRequired(haveRunFirstScenario ? false : config.build);
     _flutterAppProcess.setBuildFlavor(config.buildFlavor);
     _flutterAppProcess.setDeviceTargetId(config.targetDeviceId);
+    _flutterAppProcess.setBypassPermissions(config.permissions);
+    _flutterAppProcess.setBundleId(config.bundleId);
     stdout.writeln(
         "Starting Flutter app under test '${config.targetAppPath}', this might take a few moments");
+
     await _flutterAppProcess.run();
     final observatoryUri =
         await _flutterAppProcess.waitForObservatoryDebuggerUri();

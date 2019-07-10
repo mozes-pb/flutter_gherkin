@@ -25,6 +25,8 @@ Future<void> main() {
     // ..buildFlavor = "staging" // uncomment when using build flavor and check android/ios flavor setup see android file android\app\build.gradle
     // ..targetDeviceId = "all" // uncomment to run tests on all connected devices or set specific device target id
     // ..tagExpression = "@smoke" // uncomment to see an example of running scenarios based on tag expressions
+    // ..permissions = ["notifications"] // uncomment this and the line below to bypass permissions in iOS e.g : notifications => you will also need to install applesimutils. more info please visit : https://github.com/wix/AppleSimulatorUtils
+    // ..bundleId = "id.co.homecredit.smart" // uncomment this to identify which app bundleId's permissions to bypass
     ..exitAfterTestRun = true; // set to false if debugging to exit cleanly
   return GherkinRunner().execute(config);
 }
