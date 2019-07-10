@@ -13,7 +13,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
       multiLine: false);
 
   static RegExp _noConnectedDeviceRegex =
-      RegExp(r"no connected device", caseSensitive: false, multiLine: false);
+  RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
   static RegExp _restartedApplicationSuccessRegex = RegExp(
       r"Restarted application (.*)ms.",
@@ -28,6 +28,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
   bool _buildApp = true;
   String _buildFlavor;
   String _deviceTargetId;
+  String _
 
   void setApplicationTargetFile(String targetPath) {
     _appTarget = targetPath;
@@ -62,8 +63,17 @@ class FlutterRunProcessHandler extends ProcessHandler {
     }
 
     if (_deviceTargetId.isNotEmpty) {
+      print('device id===========> ' + _deviceTargetId);
       arguments.add("--device-id=$_deviceTargetId");
     }
+
+
+
+
+//    final iosBundleIdentifier = 'id.co.homecredit.smart';
+//    final iosSimulatorID = '1333BE8E-FC20-41BC-87EA-DF14C9AD4178';
+//
+//    await Process.run('applesimutils', ["--byId", iosSimulatorID, "--bundle", iosBundleIdentifier, "--setPermissions", "notifications=YES"]);
 
     _runningProcess = await Process.start("flutter", arguments,
         workingDirectory: _workingDirectory, runInShell: true);
