@@ -28,7 +28,6 @@ class FlutterRunProcessHandler extends ProcessHandler {
   bool _buildApp = true;
   String _buildFlavor;
   String _deviceTargetId;
-  String _
 
   void setApplicationTargetFile(String targetPath) {
     _appTarget = targetPath;
@@ -66,9 +65,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
       print('device id===========> ' + _deviceTargetId);
       arguments.add("--device-id=$_deviceTargetId");
     }
-
-
-
+    
 
 //    final iosBundleIdentifier = 'id.co.homecredit.smart';
 //    final iosSimulatorID = '1333BE8E-FC20-41BC-87EA-DF14C9AD4178';
