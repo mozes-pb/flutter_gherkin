@@ -35,6 +35,10 @@ class FlutterTestConfiguration extends TestConfiguration {
   /// Defaults to empty
   String targetDeviceId = "";
 
+  /// Insert this to bypass the permission on iOS
+  /// Defaults to empty
+  String iosDeviceName = "";
+
   /// Bypass permissions
   /// Defaults to empty
   List<String> permissions = [""];
