@@ -13,7 +13,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
       multiLine: false);
 
   static RegExp _noConnectedDeviceRegex =
-  RegExp(r"no connected device", caseSensitive: false, multiLine: false);
+      RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
   static RegExp _restartedApplicationSuccessRegex = RegExp(
       r"Restarted application (.*)ms.",
@@ -28,6 +28,8 @@ class FlutterRunProcessHandler extends ProcessHandler {
   bool _buildApp = true;
   String _buildFlavor;
   String _deviceTargetId;
+  String _iOSDeviceName;
+  String currentObservatoryUri;
   List<String> _permissions;
   String _bundleId;
 
@@ -51,6 +53,10 @@ class FlutterRunProcessHandler extends ProcessHandler {
     _deviceTargetId = deviceTargetId;
   }
 
+  void setiOSDeviceName(String iOSDeviceName) {
+    _iOSDeviceName = iOSDeviceName;
+  }
+
   void setBundleId(String bundleId) {
     _bundleId = bundleId;
   }
@@ -59,17 +65,18 @@ class FlutterRunProcessHandler extends ProcessHandler {
     _buildApp = build;
   }
 
-  Future<void> bypassPermissions() async {
-    if(_deviceTargetId.isEmpty || _bundleId.isEmpty){
+  Future<void> bypassPermissions(String iOSDeviceName, String bundleId, List<String> permissions) async {
+    if(iOSDeviceName.isEmpty || bundleId.isEmpty){
       throw Exception(
           "FlutterRunProcessHandler: to bypass permissions, bundleId and targetDeviceId must be present");
     }
-    final arguments = ["--byId", _deviceTargetId, "--bundle", _bundleId, "--setPermissions"];
-    for (int i = 0; i < _permissions.length; i++) {
-      arguments.add("${_permissions[i]}=YES");
+    final arguments = ["--byName", iOSDeviceName, "--bundle", bundleId, "--setPermissions"];
+    for (int i = 0; i < permissions.length; i++) {
+      arguments.add("${permissions[i]}=YES");
     }
     await Process.run('applesimutils', arguments);
   }
+
 
   @override
   Future<void> run() async {
@@ -88,7 +95,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
     }
 
     if(_permissions.isNotEmpty){
-      await bypassPermissions();
+      await bypassPermissions(_iOSDeviceName, _bundleId, _permissions);
     }
 
     _runningProcess = await Process.start("flutter", arguments,
@@ -117,19 +124,32 @@ class FlutterRunProcessHandler extends ProcessHandler {
     return exitCode;
   }
 
-  Future restart() async {
+  Future<bool> restart({Duration timeout = const Duration(seconds: 90)}) async {
     _ensureRunningProcess();
     _runningProcess.stdin.write("R");
-    return _waitForStdOutMessage(
-        _restartedApplicationSuccessRegex, "Timeout waiting for app restart");
+    await _waitForStdOutMessage(
+      _restartedApplicationSuccessRegex,
+      "Timeout waiting for app restart",
+      timeout,
+    );
+
+    // it seems we need a small delay here otherwise the flutter driver fails to
+    // consistently connect
+    await Future.delayed(Duration(seconds: 1));
+
+    return Future.value(true);
   }
 
-  Future<String> waitForObservatoryDebuggerUri() => _waitForStdOutMessage(
-      _observatoryDebuggerUriRegex,
-      "Timeout while waiting for observatory debugger uri");
+  Future<String> waitForObservatoryDebuggerUri() async {
+    currentObservatoryUri = await _waitForStdOutMessage(
+        _observatoryDebuggerUriRegex,
+        "Timeout while waiting for observatory debugger uri");
+
+    return currentObservatoryUri;
+  }
 
   Future<String> _waitForStdOutMessage(RegExp matcher, String timeoutMessage,
-      [Duration timeout = const Duration(seconds: 90)]) {
+      [Duration timeout = const Duration(seconds: 120)]) {
     _ensureRunningProcess();
     final completer = Completer<String>();
     StreamSubscription sub;
@@ -139,6 +159,7 @@ class FlutterRunProcessHandler extends ProcessHandler {
         completer.completeError(TimeoutException(timeoutMessage, timeout));
       }
     }).listen((logLine) {
+      // uncomment for debug output
       // stdout.write(logLine);
       if (matcher.hasMatch(logLine)) {
         sub?.cancel();

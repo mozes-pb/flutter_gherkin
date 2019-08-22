@@ -1,3 +1,12 @@
+## [1.0.6] - 21/08/2019
+* Added support to restart app during test ```world.restartApp();```
+
+## [1.0.5] - 11/07/2019
+* Updated to latest dart_gherkin lib
+
+## [1.0.4] - 21/06/2019
+* Fixed analysis suggestions
+
 ## [1.0.3] - 21/06/2019
 * Added ability to include a hook (see `AttachScreenhotOnFailedStepHook`) that takes a screenshot after a failed step. If using the json reporter it include the screenshot in the report that can then be used to generate a HTML report.
 * Updated to latest dart_gherkin lib
